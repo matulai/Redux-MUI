@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { toDoApp } from '../reducers/reducer';
+import { toDoApp } from "../reducers/reducer";
 
-const store = configureStore({ reducer: toDoApp });
+export const store = configureStore({ reducer: toDoApp });
 
-export default store;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

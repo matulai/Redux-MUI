@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import "./index.css";
 import App from "./App.tsx";
-import store from "./redux/store/store";
+import { store } from "./redux/store/store";
 
 const theme = createTheme({
   palette: {
@@ -13,6 +13,7 @@ const theme = createTheme({
     },
     primary: {
       main: "#b2b2b2",
+      dark: "#3d3d3d",
     },
     secondary: {
       main: "#000000",

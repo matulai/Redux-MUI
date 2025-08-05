@@ -1,6 +1,7 @@
 interface ToDoItem {
-    status: string;
-    content: string,
+  id: string;
+  status: string;
+  content: string;
 }
 
 export type { ToDoItem };
