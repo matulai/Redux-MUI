@@ -1,60 +1,39 @@
-import {
-  Box,
-  List,
-  Button,
-  Container,
-  TextField,
-  FormGroup,
-} from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
+import { Box, List, Button, Container, FormGroup } from "@mui/material";
 import type { AppDispatch } from "./redux/store/store";
 import type { ToDoItem } from "./types/toDoItem";
-import { selectVisibleToDos } from "./selectors/selectVisibleToDos";
 import {
   addToDoItem,
   setVisibilityFilter,
   visibilityFilters,
 } from "./redux/actions/actions";
+import { useSelector, useDispatch } from "react-redux";
+import { selectVisibleToDos } from "./selectors/selectVisibleToDos";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import ToDoListItemCreation from "./components/ToDoListItemCreation";
 import ToDoListItem from "./components/ToDoListItem";
 import CheckedBox from "./components/CheckedBox";
-import Status from "./types/status";
 import "./App.css";
 
-const colors = {
-  0: "#00b71bff",
-  1: "#b0cf01ff",
-  2: "#bd1c00ff",
-};
-
 function App() {
-  const [status, setStatus] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const [isChoosingFilters, setIsChoosingFilters] = useState(false);
-  const [description, setDescription] = useState("");
   const [hasAFilterChecked, setHasAFilterChecked] = useState(false);
 
   const toDoList: ToDoItem[] = useSelector(selectVisibleToDos);
   const dispatch = useDispatch<AppDispatch>();
   console.log("render");
-  function nextStatus() {
-    if (status < 2) {
-      setStatus(prev => prev + 1);
-    } else {
-      setStatus(0);
+
+  function addItem(description: string, status: string) {
+    if (description.trim() !== "") {
+      const id = uuidv4();
+      dispatch(addToDoItem({ id: id, content: description, status: status }));
+      handleCloseIsAdding();
     }
   }
 
-  function addItem() {
-    if (description.trim() !== "") {
-      const id = uuidv4();
-      dispatch(
-        addToDoItem({ id: id, content: description, status: Status[status] })
-      );
-      setDescription("");
-      setIsAdding(!isAdding);
-    }
+  function handleCloseIsAdding() {
+    setIsAdding(!isAdding);
   }
 
   function handleSetFilter(filter: string) {
@@ -140,62 +119,10 @@ function App() {
               paddingRight: 2,
             }}
           >
-            <Button
-              sx={{
-                color: "secondary.main",
-                bgcolor: `${colors[status]}`,
-                border: "1.5px solid ",
-              }}
-              onClick={nextStatus}
-            >
-              {Status[status]}
-            </Button>
-            <Box
-              component="form"
-              sx={{ "& .MuiTextField-root": { width: 1 }, width: 1 }}
-              noValidate
-              autoComplete="off"
-            >
-              <TextField
-                id="outlined-multiline-flexible"
-                label="Description"
-                variant="filled"
-                maxRows={4}
-                multiline
-                color="secondary"
-                onChange={e => setDescription(e.target.value)}
-              />
-            </Box>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                sx={{
-                  color: "primary.main",
-                  bgcolor: "primary.dark",
-                  border: "1.5px solid ",
-                  "&:hover": {
-                    backgroundColor: "secondary.main",
-                    color: "primary.main",
-                  },
-                }}
-                onClick={addItem}
-              >
-                Confirm
-              </Button>
-              <Button
-                sx={{
-                  color: "primary.main",
-                  bgcolor: "primary.dark",
-                  border: "1.5px solid ",
-                  "&:hover": {
-                    backgroundColor: "secondary.main",
-                    color: "primary.main",
-                  },
-                }}
-                onClick={() => setIsAdding(!isAdding)}
-              >
-                Cancel
-              </Button>
-            </Box>
+            <ToDoListItemCreation
+              handleClose={handleCloseIsAdding}
+              handleSave={addItem}
+            />
           </Box>
         ) : null}
         <List sx={{ width: 1, borderTop: 1, p: 0 }}>
