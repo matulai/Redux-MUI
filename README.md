@@ -1,3 +1,3 @@
 # React + TypeScript + Vite
 
-## Redux + MUI | Practice
+## Redux + MUI | Practice with a ToDo App
