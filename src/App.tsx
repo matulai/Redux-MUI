@@ -1,12 +1,25 @@
-import { Box, List, Button, Container, TextField } from "@mui/material";
-import ToDoListItem from "./components/ToDoListItem";
-import type { ToDoItem } from "./types/toDoItem";
+import {
+  Box,
+  List,
+  Button,
+  Container,
+  TextField,
+  FormGroup,
+} from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState, AppDispatch } from "./redux/store/store";
-import Status from "./types/status";
+import type { AppDispatch } from "./redux/store/store";
+import type { ToDoItem } from "./types/toDoItem";
+import { selectVisibleToDos } from "./selectors/selectVisibleToDos";
+import {
+  addToDoItem,
+  setVisibilityFilter,
+  visibilityFilters,
+} from "./redux/actions/actions";
 import { useState } from "react";
-import { addToDoItem } from "./redux/actions/actions";
 import { v4 as uuidv4 } from "uuid";
+import ToDoListItem from "./components/ToDoListItem";
+import CheckedBox from "./components/CheckedBox";
+import Status from "./types/status";
 import "./App.css";
 
 const colors = {
@@ -18,12 +31,13 @@ const colors = {
 function App() {
   const [status, setStatus] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
+  const [isChoosingFilters, setIsChoosingFilters] = useState(false);
   const [description, setDescription] = useState("");
-  const toDoList: ToDoItem[] = useSelector(
-    (state: RootState) => state.toDoList
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const [hasAFilterChecked, setHasAFilterChecked] = useState(false);
 
+  const toDoList: ToDoItem[] = useSelector(selectVisibleToDos);
+  const dispatch = useDispatch<AppDispatch>();
+  console.log("render");
   function nextStatus() {
     if (status < 2) {
       setStatus(prev => prev + 1);
@@ -41,6 +55,18 @@ function App() {
       setDescription("");
       setIsAdding(!isAdding);
     }
+  }
+
+  function handleSetFilter(filter: string) {
+    dispatch(setVisibilityFilter(filter));
+  }
+
+  function handleSetHasFilterChecked() {
+    // Se tiene en cuenta el siguiente estado no el actual, uso exclusivo para checkboxs
+    if (hasAFilterChecked) {
+      dispatch(setVisibilityFilter("SHOW_ALL"));
+    }
+    setHasAFilterChecked(!hasAFilterChecked);
   }
 
   return (
@@ -81,10 +107,26 @@ function App() {
                 color: "primary.main",
               },
             }}
+            onClick={() => setIsChoosingFilters(!isChoosingFilters)}
           >
             Filters
           </Button>
         </Box>
+        {isChoosingFilters ? (
+          <FormGroup sx={{ flexDirection: "row", borderTop: 1 }}>
+            {Object.keys(visibilityFilters).map(filter =>
+              filter !== "SHOW_ALL" ? (
+                <CheckedBox
+                  key={filter}
+                  handleSetFilter={() => handleSetFilter(filter)}
+                  filter={filter}
+                  hasAFilterChecked={hasAFilterChecked}
+                  setHasAFilterChecked={handleSetHasFilterChecked}
+                />
+              ) : null
+            )}
+          </FormGroup>
+        ) : null}
         {isAdding ? (
           <Box
             sx={{
@@ -93,7 +135,9 @@ function App() {
               alignItems: "flex-start",
               gap: 1,
               borderTop: 1,
-              p: 2,
+              paddingTop: 1,
+              paddingLeft: 2,
+              paddingRight: 2,
             }}
           >
             <Button
@@ -154,7 +198,7 @@ function App() {
             </Box>
           </Box>
         ) : null}
-        <List sx={{ width: 1, borderTop: 1 }}>
+        <List sx={{ width: 1, borderTop: 1, p: 0 }}>
           {toDoList.map(toDo => (
             <ToDoListItem toDoItem={toDo} key={toDo.id} />
           ))}
